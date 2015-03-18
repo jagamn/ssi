@@ -1,6 +1,4 @@
-/logs
-/src/test/.gitignore
-/src/test/resources
-/src/test/java/self
 /.idea
 /ssi.iml
+/target
+/logs
