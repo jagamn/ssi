@@ -2,6 +2,11 @@
 <beans default-autowire="byName"
        xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:jaxrs="http://cxf.apache.org/jaxrs"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
             http://www.springframework.org/schema/beans/spring-beans.xsd
             http://www.springframework.org/schema/tx
@@ -9,15 +14,40 @@
             http://www.springframework.org/schema/aop
             http://www.springframework.org/schema/aop/spring-aop.xsd
             http://www.springframework.org/schema/context
-            http://www.springframework.org/schema/context/spring-context.xsd"
-       xmlns:tx="http://www.springframework.org/schema/tx"
-       xmlns:aop="http://www.springframework.org/schema/aop"
-       xmlns:context="http://www.springframework.org/schema/context">
+            http://www.springframework.org/schema/context/spring-context.xsd
+            http://cxf.apache.org/jaxws
+            http://cxf.apache.org/schemas/jaxws.xsd
+            http://cxf.apache.org/jaxrs
+            http://cxf.apache.org/schemas/jaxrs.xsd">
 
     <!-- 扫描业务组件,除了@Controller -->
     <context:component-scan base-package="org.test.ssi">
         <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
     </context:component-scan>
+
+    <import resource="classpath:META-INF/cxf/cxf.xml" />
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+
+    <jaxws:endpoint id="greetingService"
+                    implementor="org.test.ssi.service.impl.GreetingServiceImpl"
+                    address="/GreetingService" />
+
+    <bean id="restSample" class="org.test.ssi.service.impl.RESTSampleSource"/>
+    <!-- 这里的地址很重要，客户端需要通过这个地址来访问WebService -->
+    <jaxrs:server id="restServiceContainer" address="/restful">
+        <jaxrs:serviceBeans>
+            <ref bean="restSample" />
+        </jaxrs:serviceBeans>
+
+        <jaxrs:extensionMappings>
+            <entry key="json" value="application/json" />
+            <entry key="xml" value="application/xml" />
+        </jaxrs:extensionMappings>
+
+        <jaxrs:languageMappings>
+            <entry key="en" value="en-gb"/>
+        </jaxrs:languageMappings>
+    </jaxrs:server>
 
     <context:property-placeholder location="classpath:jdbc.properties" ignore-unresolvable="true"/>
 
